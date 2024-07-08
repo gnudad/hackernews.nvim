@@ -19,6 +19,14 @@ vim.api.nvim_create_user_command("HackerNews", function()
         ),
         "",
       })
+    elseif item.type == "ask" then
+      vim.api.nvim_buf_set_lines(0, -1, -1, false, {
+        string.format("%2s. %s [https://news.ycombinator.com/%s]", i, item.title, item.url),
+        string.format("%3s %d points by %s %s | %d comments [%d]",
+          "", item.points, item.user, item.time_ago, item.comments_count, item.id
+        ),
+        "",
+      })
     elseif item.type == "job" then
       vim.api.nvim_buf_set_lines(0, -1, -1, false, {
         string.format("%2s. %s (%s) [%s]", i, item.title, item.domain, item.url),
