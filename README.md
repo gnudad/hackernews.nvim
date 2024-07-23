@@ -15,3 +15,5 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim)
 
 ## Usage
 - Open the Hacker News front page in Neovim by executing the `:HackerNews` command
+- Press `o` to read comments or open an external link in default web browser
+- Press `gq` to close a `hackernews` buffer
