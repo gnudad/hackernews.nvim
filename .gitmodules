@@ -1,0 +1,3 @@
+[submodule "vendor/lua-htmlparser"]
+	path = vendor/lua-htmlparser
+	url = git@github.com:msva/lua-htmlparser.git
