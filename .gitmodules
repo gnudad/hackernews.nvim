@@ -1,3 +1,6 @@
 [submodule "vendor/lua-htmlparser"]
 	path = vendor/lua-htmlparser
 	url = git@github.com:msva/lua-htmlparser.git
+[submodule "vendor/htmlEntities"]
+	path = vendor/htmlEntities
+	url = git@github.com:TiagoDanin/htmlEntities-for-lua.git
