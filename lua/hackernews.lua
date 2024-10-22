@@ -4,15 +4,28 @@ local htmlparser = require("htmlparser")
 
 local M = {}
 
+local function bprintf(s, ...)
+  local data = s
+  if arg ~= nil then
+    data = string.format(s, ...)
+  end
+  local start = -1
+  if vim.api.nvim_buf_get_lines(0, 0, 1, false)[1] == "" then
+    -- Write to first line of empty buffer
+    start = 0
+  end
+  data = decode(data)
+  if data then
+    vim.api.nvim_buf_set_lines(0, start, -1, false, { data })
+  end
+end
+
 function M.home()
   vim.cmd("edit home.hackernews")
   vim.opt_local.wrap = false
-  vim.api.nvim_buf_set_lines(0, 0, -1, false, {
-    "┌───┐",
-    "│ Y │ Hacker News (news.ycombinator.com)",
-    "└───┘",
-    "",
-  })
+  bprintf("┌───┐")
+  bprintf("│ Y │ Hacker News (news.ycombinator.com)")
+  bprintf("└───┘")
   local r = curl.get("https://news.ycombinator.com")
   local root = htmlparser.parse(r.body)
   local item_id, title, url, domain, points, user, age, comments
@@ -39,11 +52,9 @@ function M.home()
         "", points, user, age, comments, item_id
       )
       if #points == 0 then subline = string.format("%3s %s", "", age) end
-      vim.api.nvim_buf_set_lines(0, -1, -1, false, {
-        decode(string.format("%2s. %s (%s) [%s]", i, title, domain, url)),
-        decode(subline),
-        "",
-      })
+      bprintf("%2s. %s (%s) [%s]", i, title, domain, url)
+      bprintf(subline)
+      bprintf("")
       athing = false
     else
       athing = false
@@ -66,14 +77,12 @@ function M.item(item_id)
   local user = root("span.subline > a.hnuser")[1]:getcontent()
   local age = root("span.age > a")[1]:getcontent()
   local comments = root("span.subline > a[href^='item']")[1]:getcontent()
-  vim.api.nvim_buf_set_lines(0, 0, -1, false, {
-    decode(string.format("%s (%s) [%s]", title, domain, url)),
-    decode(string.format(
-      "%s by %s %s | %s [https://news.ycombinator.com/item?id=%s]",
-      points, user, age, comments, item_id
-    )),
-    "",
-  })
+  bprintf("%s (%s) [%s]", title, domain, url)
+  bprintf(
+    "%s by %s %s | %s [https://news.ycombinator.com/item?id=%s]",
+    points, user, age, comments, item_id
+  )
+  bprintf("")
 
   for _, tr in ipairs(root("table.comment-tree tr.comtr")) do
     local indent = string.rep(" ", 2 * tonumber(tr("td.ind")[1].attributes["indent"]))
@@ -83,15 +92,11 @@ function M.item(item_id)
     local comment = tr("div.commtext")
     if next(comment) ~= nil then
       comment = comment[1]:getcontent()
-      vim.api.nvim_buf_set_lines(0, -1, -1, false, {
-        string.format("%s%s %s [%s]", indent, user, age, item_id),
-      })
+      bprintf("%s%s %s [%s]", indent, user, age, item_id)
       for line in comment:gmatch("[^\r\n]+") do
-        vim.api.nvim_buf_set_lines(0, -1, -1, false, {
-          decode(string.format("%s%s", indent, line)),
-        })
+        bprintf("%s%s", indent, line)
       end
-      vim.api.nvim_buf_set_lines(0, -1, -1, false, { "" })
+      bprintf("")
     end
   end
 
